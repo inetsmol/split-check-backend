@@ -533,8 +533,8 @@ async def user_delete_from_check(
         users = await get_users_by_check_uuid(session, check_uuid)
 
         # Удаление
-        await delete_association_by_check_uuid(session, check_uuid, user_id_for_delete)
         await delete_user_selection_by_user_id(session, user_id_for_delete, check_uuid)
+        await delete_association_by_check_uuid(session, check_uuid, user_id_for_delete)
 
         msg_for_all = create_event_message(
             message_type=Events.USER_DELETE_FROM_CHECK_EVENT,

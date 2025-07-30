@@ -74,6 +74,11 @@ async def delete_user_selection_by_user_id(session: AsyncSession, user_id: int, 
         await session.execute(stmt)
         await session.commit()
 
+        # После успешного сохранения в БД — удаляем данные из Redis
+        redis_key = f"user_selection:{user_id}:{check_uuid}"
+        await redis_client.delete(redis_key)
+        logger.debug(f"Данные удалены из Redis для ключа {redis_key}")
+
     except Exception as e:
         logger.error(e)
 

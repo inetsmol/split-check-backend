@@ -97,4 +97,7 @@ class RedisClient:
     async def get(self, key: str) -> Optional[str]:
         return await self.client.get(key)
 
+    async def delete(self, key: str):
+        await self.client.delete(key)
+
 

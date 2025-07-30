@@ -291,6 +291,7 @@ async def user_delete_from_check_task(check_uuid: str, user_id_for_delete: int, 
         )
 
         all_user_ids = {user.id for user in users}
+        logger.debug(f"Все пользователи для отправки: {all_user_ids}")
 
         # Отправка сообщений всем пользователям
         for uid in all_user_ids:

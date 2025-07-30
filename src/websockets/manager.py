@@ -28,6 +28,7 @@ class WSConnectionManager:
         if user_id in self.active_connections:
             websocket = self.active_connections[user_id]
             await websocket.send_text(message)
+            logger.info(f"Отправлено сообщение пользователю {user_id}")
 
     async def broadcast(self, message: str):
         # Широковещательная рассылка всем подключенным пользователям

@@ -64,7 +64,7 @@ async def get_user_selection_by_user(session: AsyncSession, user_id: int, check_
     return user_selections
 
 
-async def delete_user_selection_by_user_id(session: AsyncSession, user_id: int, check_uuid: str):
+async def delete_user_selection_by_user_id(session: AsyncSession, check_uuid: str, user_id: int):
     try:
         stmt = (
             delete(UserSelection)

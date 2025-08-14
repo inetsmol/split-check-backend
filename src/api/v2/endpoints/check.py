@@ -396,15 +396,19 @@ async def join_check(
         joined_user = await get_user_by_id(session, user.id)
         users = await get_users_by_check_uuid(session, check_uuid)
 
-        event_payload = {
-            "user_id": joined_user.id,
-            "nickname": joined_user.profile.nickname,
-            "avatar_url": joined_user.profile.avatar_url,
-        }
+        event_payload = {"uuid": check_uuid,
+                         "user": {"user_id": joined_user.id,
+                                 "nickname": joined_user.profile.nickname,
+                                 "avatar_url": joined_user.profile.avatar_url}
+                                 }
 
         msg_for_all = create_event_message(
             message_type=Events.USER_JOIN_EVENT,
-            payload=event_payload
+            payload={"uuid": check_uuid,
+                     "user": {"user_id": joined_user.id,
+                             "nickname": joined_user.profile.nickname,
+                             "avatar_url": joined_user.profile.avatar_url}
+                             },
         )
 
         all_user_ids = {u.id for u in users}
@@ -468,7 +472,7 @@ async def delete_check(
             payload={"check_uuid": check_uuid},
         )
         for u in users:
-            await delete_user_selection_by_user_id(session, u.id, check_uuid)
+            await delete_user_selection_by_user_id(session, check_uuid, u.id)
             await delete_association_by_check_uuid(session, check_uuid, u.id)
             try:
                 await ws_manager.send_personal_message(
@@ -533,7 +537,7 @@ async def user_delete_from_check(
         users = await get_users_by_check_uuid(session, check_uuid)
 
         # Удаление
-        await delete_user_selection_by_user_id(session, user_id_for_delete, check_uuid)
+        await delete_user_selection_by_user_id(session, check_uuid, user_id_for_delete)
         await delete_association_by_check_uuid(session, check_uuid, user_id_for_delete)
 
         msg_for_all = create_event_message(

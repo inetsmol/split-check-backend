@@ -277,8 +277,8 @@ async def user_delete_from_check_task(check_uuid: str, user_id_for_delete: int, 
         # Получаем участников и пользователей, связанных с чеком до удаления. что-бы отправить удаленному тоже
         users = await get_users_by_check_uuid(session, check_uuid)
         # Удаляем ассоциацию пользователя с чеком и его селекшены
+        await delete_user_selection_by_user_id(session, check_uuid, user_id_for_delete)
         await delete_association_by_check_uuid(session, check_uuid, user_id_for_delete)
-        await delete_user_selection_by_user_id(session, user_id_for_delete, check_uuid)
 
         msg_for_all = create_event_message(
             message_type=Events.USER_DELETE_FROM_CHECK_EVENT,

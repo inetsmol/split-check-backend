@@ -129,7 +129,7 @@ if config.app.is_production:
     sentry_sdk.init(
         dsn="https://37e3cff9e212e28d8dfd0c03a6e6501c@o4509195406016512.ingest.de.sentry.io/4509195408244816",
         send_default_pii=True,
-        traces_sample_rate=0,
+        traces_sample_rate=1.0,
         default_integrations=False,
         integrations=[
             StarletteIntegration(),
@@ -140,7 +140,7 @@ if config.app.is_development:
     sentry_sdk.init(
         dsn="https://ae440d775755d0dd2d4e7df320b97400@o4509212320989184.ingest.us.sentry.io/4509716251344896",
         send_default_pii=True,
-        traces_sample_rate=0,
+        traces_sample_rate=1.0,
         default_integrations=False,
         integrations=[
             StarletteIntegration(),

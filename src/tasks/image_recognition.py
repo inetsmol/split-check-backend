@@ -61,7 +61,7 @@ async def recognize_image_task(
         if classification_result == "Allowed Content":
             # Распознавание чека
             if config.app.is_production:
-                recognized_json = await recognize_check_by_anthropic(file_location_directory)
+                recognized_json = await recognize_check_by_anthropic(file_location_directory, check_uuid)
             else:
                 # recognized_json = await recognize_check_by_anthropic(file_location_directory)
                 recognized_json = static_recognized_json
@@ -87,33 +87,36 @@ async def recognize_image_task(
                 error_msg = {
                     "type": Events.IMAGE_RECOGNITION_EVENT_STATUS,
                     "status": "error",
+                    "uuid": check_uuid,
                     "message": "Не удалось распознать изображение."
                 }
                 msg_to_ws = json.dumps(error_msg)
                 await ws_manager.send_personal_message(msg_to_ws, user_id)
 
-                logger.error(f"Не удалось распознать изображение {check_uuid}")
+                logger.error(f"Не удалось распознать изображение для чека {check_uuid}")
 
         else:
             error_msg = {
                 "type": Events.IMAGE_RECOGNITION_EVENT_STATUS,
                 "status": "error",
-                "message": f"Image classification failed with result: {classification_result}"
+                "uuid": check_uuid,
+                "message": f"Сбой классификации изображения. Результат: {classification_result}"
             }
             msg_to_ws = json.dumps(error_msg)
             await ws_manager.send_personal_message(msg_to_ws, user_id)
 
             logger.error(
-                f"Image classification for check_uuid {check_uuid} failed with result: {classification_result}")
+                f"Классификация изображения для check_uuid {check_uuid} завершилась с ошибкой: {classification_result}")
     except Exception as e:
 
         error_msg = {
             "type": Events.IMAGE_RECOGNITION_EVENT_STATUS,
             "status": "error",
-            "message": f"Error processing image {check_uuid}: {e}"
+            "uuid": check_uuid,
+            "message": f"Ошибка при обработке изображения {check_uuid}: {e}"
         }
         msg_to_ws = json.dumps(error_msg)
         await ws_manager.send_personal_message(msg_to_ws, user_id)
 
-        logger.error(f"Error processing image {check_uuid}: {e}")
+        logger.error(f"Ошибка при обработке изображения {check_uuid}: {e}")
     logger.info(f"Конец обработки изображения {image_path} для пользователя  {user_id}, память: {get_memory_usage():.2f} MB")

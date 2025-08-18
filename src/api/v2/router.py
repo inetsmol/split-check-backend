@@ -6,12 +6,12 @@ from src.config import config
 api_v2_router = APIRouter(prefix="/api/v2")
 
 
-api_v2_router.include_router(auth_firebase.router, prefix="/auth_firebase", tags=["auth_firebase"])
-api_v2_router.include_router(avatars.router, prefix="/avatars", tags=["avatars"])
-api_v2_router.include_router(profile.router, prefix="/users", tags=["profiles"])
-api_v2_router.include_router(check.router, prefix="/checks", tags=["checks"])
-api_v2_router.include_router(item.router, prefix="/checks", tags=["items"])
+api_v2_router.include_router(auth_firebase.router, prefix="/auth_firebase", tags=["auth_firebase V2"])
+api_v2_router.include_router(avatars.router, prefix="/avatars", tags=["avatars V2"])
+api_v2_router.include_router(profile.router, prefix="/users", tags=["profiles V2"])
+api_v2_router.include_router(check.router, prefix="/checks", tags=["checks V2"])
+api_v2_router.include_router(item.router, prefix="/checks", tags=["items V2"])
 
 
 if config.app.is_development:
-    api_v2_router.include_router(web_ui.router, prefix="/webui", tags=["webui"])
+    api_v2_router.include_router(web_ui.router, prefix="/webui", tags=["webui V2"])

@@ -1,5 +1,6 @@
 import logging
 import uuid
+from typing import Optional
 
 from fastapi import APIRouter, HTTPException
 from firebase_admin import auth
@@ -15,7 +16,7 @@ router = APIRouter()
 
 
 @router.post("/firebase", summary="Авторизация через Firebase")
-async def auth_callback(id_token):
+async def auth_callback(id_token, lang: Optional[str] = "en"):
     """
     Обрабатывает OAuth авторизацию для мобильных приложений (Google, другие провайдеры).
     """
@@ -38,6 +39,7 @@ async def auth_callback(id_token):
                 ),
                 profile_data={
                     "nickname": claims.get("name"),
+                    "language": lang,
                     "avatar_url": claims.get('picture')
                 }
             )

@@ -1,3 +1,4 @@
+# src/repositories/user.py
 import logging
 import uuid
 from datetime import datetime, timedelta
@@ -12,6 +13,7 @@ from src.config import config
 from src.core.security import async_hash_password
 from src.models import User, user_check_association, Check, UserProfile
 from src.schemas import UserCreate
+from src.services.exemple_checks import pick_exemple_check_by_locale
 from src.utils.db import with_db_session
 
 logger = logging.getLogger(config.app.service_name)
@@ -37,6 +39,14 @@ async def create_new_user(
     Raises:
         DatabaseError: Ошибка при создании пользователя.
     """
+    # получаем локаль
+    if profile_data and profile_data.get("language"):
+        locale = profile_data.get("language")
+    else:
+        locale = user_data.lang
+        # нормализуем профиль и гарантируем наличие ключа "language"
+        profile_data = dict(profile_data or {})  # создаём копию, чтобы не мутировать входной словарь
+        profile_data["language"] = locale  # фиксируем язык в profile_data
     try:
         # Проверка на существование пользователя с таким email
         existing_user = (await session.execute(
@@ -52,6 +62,7 @@ async def create_new_user(
         # Создаем профиль с данными, если они предоставлены
         profile = UserProfile(**(profile_data or {}))
 
+
         # Создаём пользователя с вложенным профилем
         new_user = User(
             email=user_data.email,
@@ -60,8 +71,19 @@ async def create_new_user(
         )
         session.add(new_user)
         # Сохраняем изменения в базе данных
+
         await session.commit()
         await session.refresh(new_user)
+
+        # создаем пробный чек
+
+        # Берем подходящий шаблон чека
+        check_data = pick_exemple_check_by_locale(locale)
+        # Добавляем его для нашего пользователя
+        from src.repositories.check import add_check_to_database
+
+        check_uuid = str(uuid.uuid4())
+        await add_check_to_database(session, check_uuid, new_user.id, check_data)
 
         return new_user
 

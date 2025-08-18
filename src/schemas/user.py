@@ -7,6 +7,7 @@ from pydantic import BaseModel, ConfigDict, Field, EmailStr, constr
 class UserCreate(BaseModel):
     email: EmailStr
     password: str
+    lang: Optional[str] = "en"
     model_config = ConfigDict(from_attributes=True)
 
 

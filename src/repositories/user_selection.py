@@ -1,3 +1,4 @@
+# src/repositories/user_selection.py
 import json
 import logging
 
@@ -8,7 +9,6 @@ from sqlalchemy.orm.attributes import flag_modified
 from src.config import config
 from src.models import UserSelection
 from src.redis import redis_client
-from src.repositories.user import get_users_by_check_uuid
 
 logger = logging.getLogger(config.app.service_name)
 
@@ -84,6 +84,7 @@ async def delete_user_selection_by_user_id(session: AsyncSession, check_uuid: st
 
 
 async def get_user_selection_by_check_uuid(session: AsyncSession, check_uuid: str):
+    from src.repositories.user import get_users_by_check_uuid
     users = await get_users_by_check_uuid(session, check_uuid)
     logger.debug(f"Получили пользователей: {', '.join([str(user) for user in users])}")
 
@@ -134,6 +135,7 @@ async def get_user_selection_by_check_uuid(session: AsyncSession, check_uuid: st
 
 
 async def delete_item_from_user_selections(session: AsyncSession, check_uuid: str, item_id: int):
+    from src.repositories.user import get_users_by_check_uuid
     users = await get_users_by_check_uuid(session, check_uuid)
     changed = False
 

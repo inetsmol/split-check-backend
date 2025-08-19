@@ -2,7 +2,7 @@ import enum
 from datetime import datetime
 from typing import List, Dict, Any, Optional
 
-from sqlalchemy import ForeignKey, UniqueConstraint, Enum, String, Float, ForeignKeyConstraint
+from sqlalchemy import ForeignKey, UniqueConstraint, Enum, String, Float, ForeignKeyConstraint, SmallInteger
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -36,10 +36,28 @@ class StatusEnum(enum.Enum):
     CLOSE = "CLOSE"
 
 
+class RecognitionStatus(enum.IntEnum):
+    """
+    Числовые коды статуса распознавания (хранятся в БД как SMALLINT).
+    """
+    NEW = 0              # запись создана, распознавание ещё не началось
+    RECOGNIZING = 1      # идёт распознавание
+    RECOGNIZED = 2       # успешно распознано и JSON записан
+    ERROR = 3            # общий аварийный статус (на всякий случай)
+    ERROR_HUGGING = 4    # ошибка/запрет на этапе classifier_image (hugging)
+    ERROR_ANTROPIC = 5   # ошибка/нет JSON на этапе Anthropic
+
+
 class Check(Base):
     __tablename__ = "checks"
     uuid: Mapped[str] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String, nullable=True)
+
+    recognition_status: Mapped[int] = mapped_column(
+        SmallInteger,
+        nullable=False,
+        default=RecognitionStatus.NEW,
+    )
 
     restaurant: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     address: Mapped[Optional[str]] = mapped_column(String, nullable=True)

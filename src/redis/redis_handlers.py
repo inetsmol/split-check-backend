@@ -13,8 +13,8 @@ queue_processor = get_queue_processor()
 
 
 @with_db_session()
-async def handle_recognize_image_task(session: AsyncSession, task_data: dict):
-    await recognize_image_task(
+async def handle_recognize_image_task(session: AsyncSession, task_data: dict) -> bool:
+    return await recognize_image_task(
         check_uuid=task_data["check_uuid"],
         user_id=task_data["user_id"],
         file_location_directory=task_data["file_location_directory"],

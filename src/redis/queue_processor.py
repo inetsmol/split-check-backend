@@ -87,7 +87,8 @@ class QueueProcessor:
                                 async with self.queue_semaphore:
                                     logger.debug(f"Выполнение задачи типа '{task_type}' (ID: {task_id})")
                                     await asyncio.wait_for(handler(task_data), timeout=60)
-                                    logger.debug(f"Задача типа '{task_type}' (ID: {task_id}) успешно выполнена")
+
+                                    logger.debug(f"Выполнение задачи типа '{task_type}' (ID: {task_id}) закончено")
                             except asyncio.TimeoutError:
                                 logger.error(
                                     f"Задача '{task_type}' (ID: {task_id}) превысила время ожидания (60 секунд)")

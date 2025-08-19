@@ -31,6 +31,6 @@ source venv/bin/activate
 
 alembic -c src/migrations/alembic.ini revision --autogenerate -m "check name"
 
-после этого проверить что он там наколбасил и только после этого применить миграцию
+после этого ОБЯЗАТЕЛЬНО проверить, что он там наколбасил и только после этого применить миграцию
 
 alembic -c src/migrations/alembic.ini upgrade head

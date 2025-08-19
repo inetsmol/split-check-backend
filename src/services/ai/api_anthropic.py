@@ -7,7 +7,7 @@ from anthropic import Anthropic
 
 from src.config import config
 from src.services.ai.prompt import prompt
-from src.utils.image_recognition import is_valid_json_response, extract_json_from_response
+from src.utils.image_recognition import is_valid_json_response
 from .message import message_for_anthropic
 
 logger = logging.getLogger(config.app.service_name)
@@ -92,24 +92,11 @@ async def recognize_check_by_anthropic(file_location_directory: str, check_uuid)
 
         # Отправляем запрос с повторными попытками
         response_text = await send_request_to_anthropic(message, check_uuid, max_retries=2)
-
-        if response_text is None:
-            logger.error(f"Не удалось получить ответ от API для чека {check_uuid}")
-            return None
-
-        # Извлекаем и парсим JSON из ответа
-        data = extract_json_from_response(response_text)
-
-        if data:
-            logger.info(f"Чек {check_uuid} успешно распознан")
-            return data
-        else:
-            logger.error(f"Не удалось извлечь данные чека {check_uuid}")
-            return None
+        return response_text
 
     except Exception as e:
         logger.error(f"Неожиданная ошибка при распознавании чека {check_uuid}: {e}")
-        return None
+        raise
     finally:
         # Очищаем переменные
         if 'message' in locals():

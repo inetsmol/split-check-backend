@@ -70,6 +70,7 @@ async def get_check_data_from_database(session: AsyncSession, check_uuid: str) -
             "author_id": check.author_id,
             "status": check.status.value,
             "error_comment": check.error_comment,
+            "recognition_status": check.recognition_status,
             "service_charge": None if check.service_charge_name is None and check.service_charge_amount is None else {
                 "name": check.service_charge_name,
                 "percentage": float(

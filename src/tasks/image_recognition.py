@@ -147,8 +147,8 @@ async def recognize_image_task(
             return False
 
         # 4.2) Обновляем чек из JSON (перезапись полей + пересоздание позиций) и завершаем успехом
-        await update_check_from_json(session, check_uuid, response_json)
         await set_recognition_status(session, check_uuid, RecognitionStatus.RECOGNIZED)
+        await update_check_from_json(session, check_uuid, response_json)
         return True
 
     except Exception as e:

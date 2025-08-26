@@ -45,7 +45,7 @@ async def update_check_from_json(
     session: AsyncSession,
     check_uuid: str,
     check_data: Dict[str, Any],
-) -> Dict[str, Any]:
+):
     """
     Обновляет существующий чек данными распознавания:
     - Перезаписывает основные поля;
@@ -133,7 +133,7 @@ async def update_check_from_json(
     check.error_comment = "; ".join(error_comments) if error_comments else None
 
     await session.commit()
-
-    # Возвращаем агрегированные данные (учтёт кеш/редис, если есть)
-    check_dict = await get_check_data_from_database(session, check_uuid)
-    return check_dict
+    #
+    # # Возвращаем агрегированные данные (учтёт кеш/редис, если есть)
+    # check_dict = await get_check_data_from_database(session, check_uuid)
+    # return check_dict

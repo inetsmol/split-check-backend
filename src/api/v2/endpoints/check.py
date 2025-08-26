@@ -185,7 +185,7 @@ async def upload_image(
         check_data = result.get("result")
         check_data = await add_check_to_database(session, check_uuid, user.id, check_data)
 
-        await redis_client.set(f"check_uuid:{check_uuid}", json.dumps(check_data), expire=config.redis.expiration)
+        # await redis_client.set(f"check_uuid:{check_uuid}", json.dumps(check_data), expire=config.redis.expiration)
 
         msg = create_event_message(
             message_type=Events.IMAGE_RECOGNITION_EVENT,

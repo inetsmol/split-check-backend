@@ -663,6 +663,9 @@ async def get_check_data(session: AsyncSession, user_id: int, check_uuid: str) -
         # Попытка получить данные из Redis
         check_data = await redis_client.get(redis_key)
 
+        # Временно отключил редис
+        check_data = False
+
         if check_data:
             logger.debug(f"Данные чека из Redis: {check_data}")
             if isinstance(check_data, (str, bytes, bytearray)):

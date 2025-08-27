@@ -140,6 +140,13 @@ class ExchangeConfig(ConfigBase):
     open_exchange_rates_api_key: SecretStr = "64878c982e8e42e089b8fae75496740a"
 
 
+class SupabaseConfig(ConfigBase):
+    model_config = SettingsConfigDict(env_prefix="SUPABASE_")
+
+    jwt_secret: SecretStr
+    algorithm: str = "HS256"
+
+
 class Config(BaseSettings):
     telegram: TelegramConfig = Field(default_factory=TelegramConfig)
     database: DatabaseConfig = Field(default_factory=DatabaseConfig)
@@ -150,6 +157,7 @@ class Config(BaseSettings):
     auth: AuthConfig = Field(default_factory=AuthConfig)
     logging: LoggingConfig = Field(default_factory=LoggingConfig)
     exchange: ExchangeConfig = Field(default_factory=ExchangeConfig)
+    supabase: SupabaseConfig = Field(default_factory=SupabaseConfig)
 
     @classmethod
     def load(cls) -> "Config":

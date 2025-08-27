@@ -102,3 +102,27 @@ async def verify_token(secret_key: str, token: str = Depends(oauth2_scheme)):
         return email, user_id
     except JWTError:
         raise credentials_exception
+
+
+async def verify_supabase_token(token: str = Depends(oauth2_scheme)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Invalid Supabase token",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
+    try:
+        payload = jwt.decode(token, config.supabase.jwt_secret.get_secret_value(), algorithms=[config.supabase.algorithm])
+        email: str = payload.get("email")
+        user_id: str = payload.get("sub")  # в sub у Supabase UUID пользователя
+        exp = payload.get("exp")
+
+        if exp < datetime.now().timestamp():
+            raise credentials_exception
+        if not email:
+            raise credentials_exception
+
+        return email, user_id
+
+    except JWTError:
+        raise credentials_exception

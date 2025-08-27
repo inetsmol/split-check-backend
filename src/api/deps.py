@@ -40,13 +40,6 @@ async def get_current_user(
         firebase_token = None
         email = None
 
-        # Смотрим header auth_type, если он есть, то в нем написан провайдер
-        auth_type = request.headers.get("auth_type")
-
-        #Если не нашли в header о пробуем посмотреть в параметре
-        if auth_type is None:
-            auth_type = request.query_params.get("auth_type")
-
         # 🥇 Приоритет 0: Кука
         cookie_token = request.cookies.get('access_token')
         if cookie_token:
@@ -55,12 +48,8 @@ async def get_current_user(
 
         # 🥈 Приоритет 1: OAuth2 токен
         elif oauth2_token:
-
-            if auth_type == 'sb':
-                email, _ = await verify_supabase_token(token=oauth2_token)
-            else:
-                logger.debug("Приоритет 1: OAuth2 токен")
-                email, _ = await verify_token(config.auth.access_secret_key.get_secret_value(), token=oauth2_token)
+            logger.debug("Приоритет 1: OAuth2 токен")
+            email, _ = await verify_token(config.auth.access_secret_key.get_secret_value(), token=oauth2_token)
 
         # 🥉 Приоритет 2: Firebase токен из заголовка
         elif http_auth:
@@ -79,16 +68,32 @@ async def get_current_user(
             if auth_header:
                 logger.debug("Приоритет 3: Authorization header")
                 if auth_header.startswith('Bearer '):
-                    firebase_token = auth_header.replace('Bearer ', '')
+                    auth_token = auth_header.replace('Bearer ', '')
                 else:
-                    firebase_token = auth_header
+                    auth_token = auth_header
 
-                claims = await get_token_from_redis(firebase_token)
-                if not claims:
-                    claims = get_firebase_user(firebase_token)
-                    await add_token_to_redis(firebase_token, claims)
+                #Получили токен, теперь пытаемся опредетить его тип
 
-                email = claims.get('email')
+                #1 Смотрим header auth_type, если он есть, то в нем написан провайдер
+                auth_type = request.headers.get("auth_type")
+
+                #2 Если не нашли в header о пробуем посмотреть в параметре
+                if auth_type is None:
+                    auth_type = request.query_params.get("auth_type")
+
+                logger.debug(f"Получили auth_type: {auth_type}")
+
+                if auth_type == 'sb':
+                    logger.debug("Верифицируем через supabase")
+                    email, _ = await verify_supabase_token(token=auth_token)
+                else:
+                    #Значит токен от fb
+                    claims = await get_token_from_redis(auth_token)
+                    if not claims:
+                        claims = get_firebase_user(auth_token)
+                        await add_token_to_redis(auth_token, claims)
+
+                        email = claims.get('email')
             else:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,

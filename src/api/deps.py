@@ -93,7 +93,7 @@ async def get_current_user(
                         claims = get_firebase_user(auth_token)
                         await add_token_to_redis(auth_token, claims)
 
-                        email = claims.get('email')
+                    email = claims.get('email')
             else:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,

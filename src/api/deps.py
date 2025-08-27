@@ -43,6 +43,10 @@ async def get_current_user(
         # Смотрим header auth_type, если он есть, то в нем написан провайдер
         auth_type = request.headers.get("auth_type")
 
+        #Если не нашли в header о пробуем посмотреть в параметре
+        if auth_type is None:
+            auth_type = request.query_params.get("auth_type")
+
         # 🥇 Приоритет 0: Кука
         cookie_token = request.cookies.get('access_token')
         if cookie_token:

@@ -115,6 +115,8 @@ async def verify_supabase_token(token: str = Depends(oauth2_scheme)):
         payload = jwt.decode(token, config.supabase.jwt_secret.get_secret_value(), algorithms=[config.supabase.algorithm])
         email: str = payload.get("email")
         user_id: str = payload.get("sub")  # в sub у Supabase UUID пользователя
+        avatar_url: str = payload.get("avatar_url")
+        full_name: str = payload.get("full_name")
         exp = payload.get("exp")
 
         if exp < datetime.now().timestamp():
@@ -122,7 +124,7 @@ async def verify_supabase_token(token: str = Depends(oauth2_scheme)):
         if not email:
             raise credentials_exception
 
-        return email, user_id
+        return email, user_id, avatar_url, full_name
 
     except JWTError:
         raise credentials_exception

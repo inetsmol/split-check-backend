@@ -86,7 +86,9 @@ async def get_check(
                     ):
     try:
         check_data = await get_check_data(session, user.id, str(uuid))
-
+        recognition_status = check_data.get("recognition_status")
+        if recognition_status != 2:
+            raise HTTPException(status_code=404, detail="Чек не найден")
         logger.debug(f"Отправлены данные чека для пользователя ИД {user.id}: {check_data}")
         return check_data
 

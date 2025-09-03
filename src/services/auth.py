@@ -1,9 +1,10 @@
 import logging
 from datetime import timedelta
-from typing import Dict
+from typing import Dict, Optional
 
 from fastapi import HTTPException
 from fastapi_mail import FastMail, MessageSchema
+from jose import jwt
 from starlette import status
 
 from src.config import config
@@ -12,6 +13,32 @@ from src.core.security import create_token
 from src.repositories.user import get_user_by_email
 
 logger = logging.getLogger(config.app.service_name)
+
+
+
+def get_auth_service(token: str) -> Optional[str]:
+    """
+    Определяет источник (сервис) токена по полю 'iss' в claims.
+
+    Args:
+        token (str): JWT токен
+
+    Returns:
+        Optional[str]: Название сервиса ("Supabase", "Firebase") или None, если сервис не определён
+    """
+    claims = jwt.get_unverified_claims(token)
+    iss = claims.get("iss")
+
+    if not iss:
+        return None
+
+    if ".supabase.co/auth/v1" in iss:
+        return "Supabase"
+
+    if iss.startswith("https://securetoken.google.com/"):
+        return "Firebase"
+
+    return None
 
 
 async def authenticate_user(email: str, password: str):

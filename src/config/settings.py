@@ -144,8 +144,8 @@ class SupabaseConfig(ConfigBase):
     model_config = SettingsConfigDict(env_prefix="SUPABASE_")
 
     jwt_secret: SecretStr = "sb_secret_ZATo4WWzF_c41H7rKi0E_A_ZXK-7awQ"
-
     algorithm: str = "HS256"
+    project_id: str = "cfndzjphjiknrmpvmeum"
 
 
 class Config(BaseSettings):

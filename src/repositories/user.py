@@ -80,10 +80,11 @@ async def create_new_user(
         # Берем подходящий шаблон чека
         check_data = pick_exemple_check_by_locale(locale)
         # Добавляем его для нашего пользователя
-        from src.repositories.check import add_check_to_database
+        from src.repositories.check import add_check_to_database, set_check_recognition_status
 
         check_uuid = str(uuid.uuid4())
         await add_check_to_database(session, check_uuid, new_user.id, check_data)
+        await set_check_recognition_status(session, check_uuid, 2)
 
         return new_user
 

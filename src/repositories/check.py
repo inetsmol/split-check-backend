@@ -12,7 +12,7 @@ from sqlalchemy.orm.attributes import flag_modified
 from starlette.exceptions import HTTPException
 
 from src.config import config
-from src.models import Check, user_check_association, User, UserSelection, StatusEnum
+from src.models import Check, user_check_association, User, UserSelection, StatusEnum, RecognitionStatus
 from src.redis import redis_client
 from src.repositories.item import get_items_by_check_uuid, add_item_to_check
 from src.repositories.user_selection import get_user_selection_by_check_uuid
@@ -26,6 +26,38 @@ async def get_check_by_uuid(session: AsyncSession, check_uuid: str) -> Optional[
     stmt = select(Check).filter_by(uuid=check_uuid)
     result = await session.execute(stmt)
     return result.scalar_one_or_none()
+
+
+async def get_check_recognition_status(session: AsyncSession, check_uuid: str) -> dict:
+    try:
+        check = await get_check_by_uuid(session, check_uuid)
+        if not check:
+            raise Exception(f"Check with UUID {check_uuid} not found")
+        recognition_status = {
+            "uuid": check.uuid,
+            "error_comment": check.error_comment,
+            "recognition_status": check.recognition_status,
+        }
+        return recognition_status
+    except Exception as e:
+        logger.error(f"Error retrieving recognition_status for check {check_uuid}: {e}")
+        raise
+
+
+async def set_check_recognition_status(session: AsyncSession, check_uuid: str, status) -> None:
+    """
+    Установить поле `recognition_status` для чека с данным UUID.
+
+    :param session: Асинхронная сессия SQLAlchemy 2.x.
+    :param check_uuid: UUID записи в таблице checks.
+    :param status: Значение статуса
+    """
+    await session.execute(
+        update(Check)
+        .where(Check.uuid == check_uuid)
+        .values(recognition_status=status)
+    )
+    await session.commit()
 
 
 async def get_check_data_from_database(session: AsyncSession, check_uuid: str) -> dict:

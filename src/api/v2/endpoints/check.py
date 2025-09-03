@@ -22,7 +22,8 @@ from src.models import User, StatusEnum
 from src.redis import redis_client
 from src.redis.queue_processor import get_queue_processor
 from src.repositories.check import get_all_checks_for_user, get_check_data, add_check_to_database, \
-    edit_check_name_to_database, edit_check_status_to_database, delete_association_by_check_uuid, is_check_author
+    edit_check_name_to_database, edit_check_status_to_database, delete_association_by_check_uuid, is_check_author, \
+    get_check_recognition_status, set_check_recognition_status
 from src.repositories.user import get_users_by_check_uuid, get_user_by_id
 from src.repositories.user_selection import add_or_update_user_selection, delete_user_selection_by_user_id
 from src.schemas import CheckSelectionRequest
@@ -106,6 +107,23 @@ async def get_check(
         )
 
 
+@router.get("/{uuid}/recognition/status", summary="Получить по UUID статус распознавания", response_model=dict)
+async def get_recognition_status(
+        uuid: UUID = Path(..., description="UUID чека"),
+        user: User = Depends(get_current_user),
+        session: AsyncSession = Depends(get_session)
+):
+    try:
+        check_status = await get_check_recognition_status(session, str(uuid))
+        return check_status
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail="Внутренняя ошибка сервера"
+        )
+
+
+
 @router.post("/add", summary="Добавление пустого чека. Синхронный ответ", response_model=dict, status_code=200)
 async def add_empty_check(
         request: Request,
@@ -125,6 +143,7 @@ async def add_empty_check(
 
     try:
         await add_check_to_database(session, check_uuid, user.id)
+        await set_check_recognition_status(session, check_uuid, 2)
         logger.debug(f"Пользователь {user.id} добавил чек {check_uuid}")
     except Exception as e:
         logger.error(f"Ошибка при добавлении чека: {e}")

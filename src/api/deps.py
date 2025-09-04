@@ -136,7 +136,9 @@ async def get_current_user_for_websocket(websocket: WebSocket):
             email, _ = await verify_token(config.auth.access_secret_key.get_secret_value(), token)
         elif id_token:
             service = get_auth_service(id_token)
+            logger.debug(f"get_current_user_for_websocket auth service: {service}")
             email = await resolve_email_from_token(id_token, service)
+            logger.debug(f"get_current_user_for_websocket email: {service}")
         else:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                                 detail="Не предоставлен токен авторизации")

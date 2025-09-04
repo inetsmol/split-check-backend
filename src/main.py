@@ -57,22 +57,22 @@ async def lifespan(app: FastAPI):
     queue_processor.queue_semaphore = asyncio.Semaphore(max_processes)
     # Запускаем только одну задачу процессора очереди
     queue_task = asyncio.create_task(queue_processor.process_queue())
-
-    logger.info(f"Старт, память: {get_memory_usage():.2f} MB")
-
-    # Создаем монитор памяти
-    memory_monitor = MemoryMonitor(history_size=120)  # История за 2 часа при интервале 60 сек
-
-    # Запускаем улучшенный мониторинг в фоновом режиме
-    memory_task = asyncio.create_task(
-        monitor_memory_improved(
-            monitor=memory_monitor,
-            interval=600,  # Каждые 10 минут
-            warning_threshold_mb=1500,
-            critical_threshold_mb=2000,
-            enable_tracemalloc=config.app.is_development  # Только в dev окружении
-        )
-    )
+    #
+    # logger.info(f"Старт, память: {get_memory_usage():.2f} MB")
+    #
+    # # Создаем монитор памяти
+    # memory_monitor = MemoryMonitor(history_size=120)  # История за 2 часа при интервале 60 сек
+    #
+    # # Запускаем улучшенный мониторинг в фоновом режиме
+    # memory_task = asyncio.create_task(
+    #     monitor_memory_improved(
+    #         monitor=memory_monitor,
+    #         interval=600,  # Каждые 10 минут
+    #         warning_threshold_mb=1500,
+    #         critical_threshold_mb=2000,
+    #         enable_tracemalloc=config.app.is_development  # Только в dev окружении
+    #     )
+    # )
 
     async def periodic_user_cleanup():
         while True:
@@ -87,13 +87,13 @@ async def lifespan(app: FastAPI):
 
     yield
     queue_task.cancel()
-    memory_task.cancel()
+    # memory_task.cancel()
     user_cleanup_task.cancel()
 
-    try:
-        await memory_task
-    except asyncio.CancelledError:
-        logger.info("Memory monitor cancelled")
+    # try:
+    #     await memory_task
+    # except asyncio.CancelledError:
+    #     logger.info("Memory monitor cancelled")
 
     try:
         await queue_task
@@ -122,7 +122,7 @@ async def lifespan(app: FastAPI):
     from src.core.security import cleanup_executor as cleanup_security_executor
     cleanup_security_executor()
 
-    logger.info(f"Завершение, память: {get_memory_usage():.2f} MB")
+    # logger.info(f"Завершение, память: {get_memory_usage():.2f} MB")
 
 
 if config.app.is_production:

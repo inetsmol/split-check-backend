@@ -1,3 +1,4 @@
+# src/api/deps.py
 import logging
 from typing import Optional
 
@@ -128,26 +129,42 @@ async def get_current_user(
 
 
 async def get_current_user_for_websocket(websocket: WebSocket):
+    """
+    Аутентификация для WebSocket.
+    """
     try:
-        token = websocket.query_params.get("token")      # OAuth2
-        id_token = websocket.query_params.get("id_token")  # Supabase/Firebase
+        # Логируем входящие query params (без значений, чтобы не светить токены в логах)
+        logger.debug(
+            "WS auth start: params=%s client=%s",
+            list(websocket.query_params.keys()),
+            websocket.client
+        )
+
+        token = websocket.query_params.get("token")         # вариант: наш access JWT (OAuth2)
+        id_token = websocket.query_params.get("id_token")   # вариант: Supabase/Firebase
 
         if token:
+            logger.debug("WS auth via OAuth2 access token (JWT)")
             email, _ = await verify_token(config.auth.access_secret_key.get_secret_value(), token)
+
         elif id_token:
             service = get_auth_service(id_token)
-            logger.debug(f"get_current_user_for_websocket auth service: {service}")
+            logger.debug("WS auth via id_token, service=%s", service)
             email = await resolve_email_from_token(id_token, service)
-            logger.debug(f"get_current_user_for_websocket email: {service}")
+            logger.debug("WS resolved email=%s", email)
+
         else:
+            logger.warning("WS auth failed: no token nor id_token in query")
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                                 detail="Не предоставлен токен авторизации")
 
-        return await get_user_or_401(email)
+        user = await get_user_or_401(email)
+        logger.debug("WS auth OK for user_id=%s", user.id)
+        return user
 
-    except HTTPException as he:
-        raise he
-    except Exception as e:
-        logger.exception(e)
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("WS auth unexpected error")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Не удалось проверить учетные данные")

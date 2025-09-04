@@ -29,6 +29,7 @@ class AppConfig(ConfigBase):
     enable_docs: bool = True
     allowed_ips: list[str] = ["127.0.0.1", "192.168.0.1"]
     max_processes: int = 4
+    is_enabled: bool = True
     host: str = "0.0.0.0"
     port: int = 8080
 

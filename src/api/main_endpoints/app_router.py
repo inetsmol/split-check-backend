@@ -117,3 +117,8 @@ async def read_version():
 @router.get("/health")
 async def health_check():
     return {"status": "ok"}
+
+
+@router.get("/app_enabled")
+async def app_enabled():
+    return config.app.is_enabled

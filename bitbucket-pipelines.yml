@@ -22,7 +22,7 @@ pipelines:
                 SSH_USER: $SCANNSPLIT_APP_TEST_SRV_USER
                 SERVER: $SCANNSPLIT_APP_TEST_SRV_HOST
                 COMMAND: cd '/app/api' && ./deploy.sh 
-    master:
+    main:
       - step:
           name: Copy last version to server
           script:

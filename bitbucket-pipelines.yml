@@ -29,8 +29,8 @@ pipelines:
             - rm -f bitbucket-pipelines.yml package.json package-lock.json .env
             - pipe: atlassian/scp-deploy:0.3.3
               variables:
-                USER: $SCANNSPLIT_APP_TEST_SRV_USER
-                SERVER: $SCANNSPLIT_APP_TEST_SRV_HOST
+                USER: $SCANNSPLIT_APP_PROD_SRV_USER
+                SERVER: $SCANNSPLIT_APP_PROD_SRV_HOST
                 REMOTE_PATH: '/app'
                 LOCAL_PATH: './*'
       - step:
@@ -38,6 +38,6 @@ pipelines:
           script:
             - pipe: atlassian/ssh-run:0.8.0
               variables:
-                SSH_USER: $SCANNSPLIT_APP_TEST_SRV_USER
-                SERVER: $SCANNSPLIT_APP_TEST_SRV_HOST
+                SSH_USER: $SCANNSPLIT_APP_PROD_SRV_USER
+                SERVER: $SCANNSPLIT_APP_PROD_SRV_HOST
                 COMMAND: cd /app && chmod 755 deploy.sh && /bin/bash deploy.sh && chmod 555 deploy.sh

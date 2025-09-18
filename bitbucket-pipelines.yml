@@ -31,7 +31,7 @@ pipelines:
               variables:
                 USER: $SCANNSPLIT_APP_PROD_SRV_USER
                 SERVER: $SCANNSPLIT_APP_PROD_SRV_HOST
-                REMOTE_PATH: '/app'
+                REMOTE_PATH: '/app/api'
                 LOCAL_PATH: './*'
       - step:
           name: run deploy.sh script
@@ -40,4 +40,4 @@ pipelines:
               variables:
                 SSH_USER: $SCANNSPLIT_APP_PROD_SRV_USER
                 SERVER: $SCANNSPLIT_APP_PROD_SRV_HOST
-                COMMAND: cd /app && chmod 755 deploy.sh && /bin/bash deploy.sh && chmod 555 deploy.sh
+                COMMAND: cd '/app/api' && ./deploy.sh

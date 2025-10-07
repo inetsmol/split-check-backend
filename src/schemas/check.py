@@ -70,8 +70,10 @@ class CheckSelectionRequest(BaseModel):
 class CheckListResponse(BaseModel):
     uuid: str
     name: str
+    author_id: int
     currency: Optional[str] = None
     status: str
     date: str
     total: Optional[Sum]
     restaurant: Optional[str] = None
+

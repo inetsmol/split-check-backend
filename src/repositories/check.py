@@ -534,6 +534,7 @@ async def get_all_checks_for_user(session: AsyncSession,
                 CheckListResponse(
                     uuid=check.uuid,
                     name=check.name,
+                    author_id = check.author_id,
                     currency=check.currency,
                     status=check.status.value,
                     date=check.created_at.strftime("%d.%m.%Y"),
@@ -615,6 +616,7 @@ async def get_main_page_checks(session: AsyncSession, user_id: int) -> dict:
                 CheckListResponse(
                     uuid=check.uuid,
                     name=check.name,
+                    author_id=check.author_id,
                     currency=check.currency,
                     status=check.status.value,
                     date=check.created_at.strftime("%d.%m.%Y"),

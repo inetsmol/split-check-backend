@@ -127,7 +127,7 @@ async def app_enabled():
     return config.app.is_enabled
 
 
-@router.post("support/tickets")
+@router.post("/support/tickets")
 async def support_ticket(
                         request: Request,
                         user_message: str,

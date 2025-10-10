@@ -50,3 +50,13 @@ class User(Base):
         return f"User(id={self.id}, email={self.email})"
 
 
+class SupportTicket(Base):
+    __tablename__ = "support_tickets"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(nullable=True)
+    user_message: Mapped[str]
+    app_version: Mapped[str]
+    device_info: Mapped[str]
+    locale: Mapped[str]
+    email: Mapped[str] = mapped_column(nullable=True)
+    location: Mapped[str]

@@ -4,14 +4,17 @@ from fastapi import Request, APIRouter, Depends, HTTPException
 from fastapi.responses import RedirectResponse
 from starlette import status
 from starlette.responses import HTMLResponse
+from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Optional
 
 from src.api.deps import get_current_user
 from src.config import config
 from src.config.type_events import EVENT_DESCRIPTIONS
-from src.models import User
+from src.models import User, SupportTicket
 from src.redis import redis_client
 from src.schemas.app import LogLevelUpdateRequest
 from src.version import APP_VERSION
+from src.utils.db import get_session
 
 router = APIRouter()
 
@@ -122,3 +125,30 @@ async def health_check():
 @router.get("/app_enabled")
 async def app_enabled():
     return config.app.is_enabled
+
+
+@router.post("support/tickets")
+async def support_ticket(
+                        request: Request,
+                        user_message: str,
+                        app_version: str,
+                        device_info: str,
+                        locale: str,
+                        location: str,
+                        user_id: Optional[str] = None,
+                        email: Optional[str] = None,
+                        session: AsyncSession = Depends(get_session),
+                        ):
+    ticket = SupportTicket(
+        user_message=user_message,
+        app_version=app_version,
+        device_info=device_info,
+        locale=locale,
+        user_id=user_id,
+        email=email,
+        location=location
+    )
+    session.add(ticket)
+    await session.commit()
+
+    return {"message": "Сообщение создано"}

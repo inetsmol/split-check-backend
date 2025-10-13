@@ -61,3 +61,13 @@ class PasswordResetRequest(BaseModel):
 
 class UserDeleteResponse(BaseModel):
     detail: str
+
+
+class SupportTicketCreate(BaseModel):
+    user_message: str = Field(..., description="Текст сообщения от пользователя")
+    app_version: str = Field(..., description="Версия приложения")
+    device_info: str = Field(..., description="Информация об устройстве")
+    locale: str = Field(..., description="Локаль пользователя, напр. 'ru-RU'")
+    location: str = Field(..., description="Гео/строка местоположения")
+    user_id: Optional[int] = Field(None, description="ID пользователя (если авторизован)")
+    email: Optional[str] = Field(None, description="Email для обратной связи")

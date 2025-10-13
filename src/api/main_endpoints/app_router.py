@@ -12,6 +12,7 @@ from src.config import config
 from src.config.type_events import EVENT_DESCRIPTIONS
 from src.models import User, SupportTicket
 from src.redis import redis_client
+from src.schemas import SupportTicketCreate
 from src.schemas.app import LogLevelUpdateRequest
 from src.version import APP_VERSION
 from src.utils.db import get_session
@@ -129,24 +130,20 @@ async def app_enabled():
 
 @router.post("/support/tickets")
 async def support_ticket(
-                        request: Request,
-                        user_message: str,
-                        app_version: str,
-                        device_info: str,
-                        locale: str,
-                        location: str,
-                        user_id: Optional[str] = None,
-                        email: Optional[str] = None,
-                        session: AsyncSession = Depends(get_session),
+        payload: SupportTicketCreate,
+        session: AsyncSession = Depends(get_session),
                         ):
+    """
+    Создаёт тикет поддержки.
+    """
     ticket = SupportTicket(
-        user_message=user_message,
-        app_version=app_version,
-        device_info=device_info,
-        locale=locale,
-        user_id=user_id,
-        email=email,
-        location=location
+        user_message=payload.user_message,
+        app_version=payload.app_version,
+        device_info=payload.device_info,
+        locale=payload.locale,
+        user_id=payload.user_id,
+        email=payload.email,
+        location=payload.location,
     )
     session.add(ticket)
     await session.commit()

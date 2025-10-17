@@ -18,7 +18,7 @@ router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/token")
 
 
-# Эндпоинт для получения access_token и refresh_token
+# Эндпоинт для получения id_token и refresh_token
 @router.post(
     "",
     response_model=TokenResponse,
@@ -53,10 +53,10 @@ async def login_for_access_token(request: Request,
         max_age=config.auth.refresh_token_expire_minutes * 60
     )
 
-    # Также сохраним access_token в куки
+    # Также сохраним id_token в куки
     response.set_cookie(
-        key="access_token",
-        value=tokens["access_token"],
+        key="id_token",
+        value=tokens["id_token"],
         httponly=False,
         secure=False,
         samesite="strict",
@@ -102,8 +102,8 @@ async def refresh_access_token(request: RefreshTokenRequest, response: Response)
         )
 
         response.set_cookie(
-            key="access_token",
-            value=tokens["access_token"],
+            key="id_token",
+            value=tokens["id_token"],
             httponly=False,
             secure=False,
             samesite="strict",
@@ -127,7 +127,7 @@ async def logout(response: Response):
         httponly=False
     )
     response.delete_cookie(
-        key="access_token",
+        key="id_token",
         secure=False,
         httponly=False
     )

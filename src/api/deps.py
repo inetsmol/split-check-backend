@@ -70,9 +70,9 @@ async def get_email_from_request(
     Унифицированная логика выбора источника email (cookie, OAuth2, Firebase, Authorization header).
     """
     # 0. Cookie
-    cookie_token = request.cookies.get("access_token")
+    cookie_token = request.cookies.get("id_token")
     if cookie_token:
-        logger.debug("Приоритет 0: access_token из cookie")
+        logger.debug("Приоритет 0: id_token из cookie")
         email, _ = await verify_token(config.auth.access_secret_key.get_secret_value(), cookie_token)
         return email
 

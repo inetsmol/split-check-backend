@@ -114,6 +114,8 @@ class AuthConfig(ConfigBase):
     access_secret_key: SecretStr = "jAR5EFlJrpkjw4QeQ69NGz"
     refresh_secret_key: SecretStr = "cw0VRathl089NGzVoypmDcC3"
 
+    google_client_id: SecretStr = "ppp0lu03namnbbv4vue.apps.googleusercontent.com"
+
     algorithm: str = "HS256"
     # Время действия токенов
     access_token_expire_minutes: int = 600

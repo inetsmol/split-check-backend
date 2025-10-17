@@ -63,7 +63,7 @@ async def generate_tokens(email: str, user_id: int) -> Dict[str, str]:
     )
 
     return {
-        "access_token": access_token,
+        "id_token": access_token,
         "refresh_token": refresh_token,
         "token_type": "bearer"
     }

@@ -10,6 +10,11 @@ redis
 #opencv-python
 
 SQLAlchemy
+alembic
+
+tortoise-orm[asyncpg]
+aerich
+
 httpx
 Scrapy
 numpy
@@ -19,7 +24,7 @@ pydantic[email]
 pydantic-settings
 
 passlib
-alembic
+
 python-jose
 bcrypt
 nats-py
@@ -50,3 +55,4 @@ sentry-sdk[fastapi]
 
 aiohttp
 openai
+google-auth

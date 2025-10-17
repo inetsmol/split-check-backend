@@ -4,13 +4,15 @@ from typing import Optional
 
 from fastapi import APIRouter, HTTPException
 from firebase_admin import auth
+from google.oauth2 import id_token as google_id_token             # валидация ID-токена Google
+from google.auth.transport import requests as google_auth_requests # HTTP-транспорт для google-auth
 from starlette import status
 
 from src.config import config
 from src.core.security import get_supabase_user
 from src.redis.utils import add_token_to_redis, get_token_from_redis
 from src.repositories.user import get_user_by_email, create_new_user
-from src.schemas import UserCreate, TokenResponse
+from src.schemas import UserCreate, TokenResponse, IDTokenRequest
 from src.services.auth import get_auth_service, generate_tokens
 
 logger = logging.getLogger(config.app.service_name)
@@ -137,15 +139,16 @@ async def auth_callback(id_token, lang: Optional[str] = "en"):
         404: {"description": "User not found and cannot be created"},
     },
 )
-async def login_google_token(id_token: str, lang: Optional[str] = "en"):
+async def login_google_token(request: IDTokenRequest, lang: Optional[str] = "en"):
     """
     Принимает **Google ID Token** (OIDC), валидирует его и возвращает нашу пару токенов.
     """
     logger.debug("Получен Google id_token (обрезано в логах)")
+    id_token = request.id_token
 
     try:
 
-        claims = auth.verify_id_token(id_token)
+        claims = google_id_token.verify_oauth2_token(id_token, google_auth_requests.Request(), config.auth.google_client_id)
         email = claims.get('email')
         logger.debug(f"user: {claims}")
 

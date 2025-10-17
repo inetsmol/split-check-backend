@@ -22,6 +22,11 @@ class RefreshTokenRequest(BaseModel):
     refresh_token: str
 
 
+class IDTokenRequest(BaseModel):
+    """Запрос на получение токенов"""
+    id_token: str
+
+
 class PasswordReset(BaseModel):
     token: str
     new_password: str

@@ -52,3 +52,11 @@ venv
 /scannsplit-f8c5f-firebase-adminsdk-qbv0s-0366c88bab.json
 /alembic.ini
 /src/all_code.py
+docker-compose.yml
+Dockerfile
+output.txt
+pytest.ini
+scannsplit-firebase-adminsdk.json
+android_cert/
+hf_models/
+*__pycache__*

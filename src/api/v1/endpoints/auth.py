@@ -19,6 +19,8 @@ logger = logging.getLogger(config.app.service_name)
 
 router = APIRouter()
 
+OAUTH_PASSWORD_PLACEHOLDER = "!OAUTH_NO_PASSWORD!"
+
 
 @router.post("/", summary="Авторизация через Firebase или Supabase")
 async def auth_callback(id_token: str, lang: Optional[str] = "en"):
@@ -136,51 +138,80 @@ async def auth_callback(id_token, lang: Optional[str] = "en"):
     responses={
         400: {"description": "Bad request"},
         401: {"description": "Invalid Google ID token"},
-        404: {"description": "User not found and cannot be created"},
+        500: {"description": "Internal server error"},
     },
 )
 async def login_google_token(request: IDTokenRequest, lang: Optional[str] = "en"):
     """
     Принимает **Google ID Token** (OIDC), валидирует его и возвращает нашу пару токенов.
     """
-    logger.debug("Получен Google id_token (обрезано в логах)")
-    id_token = request.id_token
+    logger.debug("Начата авторизация через Google ID Token")
 
     try:
+        # Верификация токена
+        claims = google_id_token.verify_oauth2_token(
+            request.id_token,
+            google_auth_requests.Request(),
+            config.auth.google_client_id.get_secret_value()
+        )
 
-        claims = google_id_token.verify_oauth2_token(id_token, google_auth_requests.Request(), config.auth.google_client_id)
+        # Валидация обязательных полей
         email = claims.get('email')
-        logger.debug(f"user: {claims}")
+        if not email:
+            logger.warning("Токен не содержит email")
+            raise HTTPException(
+                status_code=401,
+                detail="Email not found in token"
+            )
 
+        # Проверка верификации email
+        if not claims.get('email_verified', False):
+            logger.warning(f"Email не верифицирован: {email}")
+            raise HTTPException(
+                status_code=401,
+                detail="Email not verified by Google"
+            )
+
+        logger.debug(f"Успешная верификация токена для email: {email}")
+
+        # Поиск или создание пользователя
         user = await get_user_by_email(email)
         if not user:
-            # Создаем нового пользователя
+            logger.info(f"Создание нового пользователя: {email}")
             user = await create_new_user(
                 user_data=UserCreate(
                     email=email,
-                    password=uuid.uuid4().hex
+                    password=OAUTH_PASSWORD_PLACEHOLDER
                 ),
                 profile_data={
-                    "nickname": claims.get("name"),
+                    "nickname": claims.get("name", ""),
                     "language": lang,
-                    "avatar_url": claims.get('picture')
+                    "avatar_url": claims.get("picture")
                 }
             )
-        tokens = await generate_tokens(user.email, user.id)
 
-        return tokens
+        # Генерация токенов
+        tokens = await generate_tokens(user.email, user.id)
+        logger.info(f"Успешная авторизация пользователя: {email}")
+        return {
+            "access_token": tokens.get("id_token"),
+            "refresh_token": tokens.get("refresh_token")
+        }
 
     except ValueError as e:
-        # Ошибка верификации токена
-        logger.error(f"Invalid token: {e}")
+        # Ошибка верификации токена Google
+        logger.warning(f"Невалидный Google ID token: {str(e)}")
         raise HTTPException(
-            status_code=400,
-            detail="Invalid token"
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired Google ID token"
         )
+    except HTTPException:
+        # Пробрасываем HTTP исключения как есть
+        raise
     except Exception as e:
-        # Логируем неожиданные ошибки
-        logger.error(f"Unexpected error during Google authentication: {str(e)}")
+        # Неожиданные ошибки
+        logger.error(f"Ошибка при Google аутентификации: {str(e)}", exc_info=True)
         raise HTTPException(
-            status_code=500,
-            detail="Authentication failed"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal authentication error"
         )

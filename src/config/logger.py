@@ -122,7 +122,9 @@ def setup_logging(
 
     class UvicornAccessFilter(logging.Filter):
         def filter(self, record: logging.LogRecord) -> bool:
-            return "/metrics" not in record.getMessage()
+            message = record.getMessage()
+            # Исключаем запросы к /metrics и к Sentry
+            return "/metrics" not in message and "sentry.io" not in message
 
     uvicorn_access_logger = logging.getLogger("uvicorn.access")
     uvicorn_access_logger.addFilter(UvicornAccessFilter())
